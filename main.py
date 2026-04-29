@@ -1,20 +1,54 @@
-import matplotlib.pyplot as plt
+import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
-x = np.linspace(-5, 5, 100)
+# Загрузка изображения
+img = cv2.imread('images/tr.jpg')  # Замените 'coins.jpg' на ваш файл изображения
 
-def gauss(sigma, mu):
-    return 1/(sigma * (2*np.pi)**.5) * np.e ** (-(x-mu)**2/(2 * sigma**2))
+# Преобразование в градации серого
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-dpi = 80
-fig = plt.figure(dpi=dpi, figsize=(512 / dpi, 384 / dpi))
+# Размытие изображения для уменьшения шума
+gray_blurred = cv2.medianBlur(gray, 5)
 
-plt.plot(x, gauss(0.5, 1.0), 'ro-')
-plt.plot(x, gauss(1.0, 0.5), 'go-')
-plt.plot(x, gauss(1.5, 0.0), 'bo-')
+# Параметры для функции HoughCircles
+dp = 1                # Параметр разрешения аккумуляторного массива
+minDist = 10            # Минимальное расстояние между центрами обнаруженных окружностей
+param1 = 50             # Порог для метода Кэнни
+param2 = 30            # Порог для функции HoughCircles (чем меньше, тем больше ложных кругов)
+minRadius = 3         # Минимальный радиус круга
+maxRadius = 25          # Максимальный радиус круга
 
-plt.legend(['sigma = 0.5, mu = 1.0',
-            'sigma = 1.0, mu = 0.5',
-            'sigma = 1.5, mu = 0.0'], loc='upper left')
+# Обнаружение кругов
+circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp, minDist,
+                           param1=param1, param2=param2,
+                           minRadius=minRadius, maxRadius=maxRadius)
+# Создание копии изображения для отображения результатов
+img_circles = img.copy()
 
-fig.savefig('gauss.png')
+# Проверка, найдены ли круги
+if circles is not None:
+    # Округление координат центров и радиусов до целых чисел
+    circles = np.uint16(np.around(circles))
+    for circle in circles[0, :]:
+        center = (circle[0], circle[1])  # Координаты центра
+        radius = circle[2]              # Радиус
+        # Рисование контура круга
+        cv2.circle(img_circles, center, radius, (0, 255, 0), 2)
+        # Рисование центра круга
+        cv2.circle(img_circles, center, 2, (0, 0, 255), 3)
+else:
+    print("Круги не найдены")
+
+# Отображение результатов
+plt.figure(figsize=(15, 10))
+plt.subplot(1, 2, 1)
+plt.title('Размытое изображение')
+plt.imshow(gray_blurred, cmap='gray')
+plt.axis('off')
+
+plt.subplot(1, 2, 2)
+plt.title('Обнаруженные круги (Преобразование Хафа)')
+plt.imshow(cv2.cvtColor(img_circles, cv2.COLOR_BGR2RGB))
+plt.axis('off')
+plt.show()
