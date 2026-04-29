@@ -3,21 +3,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Загрузка изображения
-img = cv2.imread('images/tr.jpg')
+img = cv2.imread('images/3.jpg')
 
 # Преобразование в градации серого
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 # Размытие изображения для уменьшения шума
-gray_blurred = cv2.medianBlur(gray, 5)
+gray_blurred = cv2.medianBlur(gray, 23)
 
 # Параметры для функции HoughCircles
-dp = 1                # Параметр разрешения аккумуляторного массива
-minDist = 10            # Минимальное расстояние между центрами обнаруженных окружностей
-param1 = 110             # Порог для метода Кэнни
-param2 = 25            # Порог для функции HoughCircles (чем меньше, тем больше ложных кругов)
-minRadius = 10        # Минимальный радиус круга
-maxRadius = 25          # Максимальный радиус круга
+dp = 0.7                # Параметр разрешения аккумуляторного массива
+minDist = 13            # Минимальное расстояние между центрами обнаруженных окружностей
+param1 = 31             # Порог для метода Кэнни
+param2 = 23            # Порог для функции HoughCircles (чем меньше, тем больше ложных кругов)
+minRadius = 5        # Минимальный радиус круга
+maxRadius = 40          # Максимальный радиус круга
 
 # Обнаружение кругов
 circles = cv2.HoughCircles(gray_blurred, cv2.HOUGH_GRADIENT, dp, minDist,
